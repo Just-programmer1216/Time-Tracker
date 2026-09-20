@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  @apply bg-emerald-50 text-slate-800 transition-colors dark:bg-slate-900 dark:text-slate-100;
+}
