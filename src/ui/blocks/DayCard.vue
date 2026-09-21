@@ -17,7 +17,7 @@ const emit = defineEmits<{
 <template>
   <button
     type="button"
-    class="flex w-full flex-col gap-2 rounded-lg border p-3 text-left transition-colors"
+    class="flex h-full w-full flex-col gap-2 rounded-lg border p-3 text-left transition-colors"
     :class="
       props.isSelected
         ? 'border-emerald-400 bg-emerald-50 dark:border-emerald-500 dark:bg-slate-700'

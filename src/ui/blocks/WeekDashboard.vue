@@ -5,14 +5,14 @@ import { usePlanner } from '@/composables/usePlanner'
 import type { Category, DayOfWeek } from '@/types'
 import { getDateForDayOfWeek } from '@/utils/week'
 
-import BlockList from './BlockList.vue'
 import DayCard from './DayCard.vue'
+import DayTimelineModal from './DayTimelineModal.vue'
 
 const { blocks, categories } = usePlanner()
 
 const DAYS: DayOfWeek[] = [1, 2, 3, 4, 5, 6, 7]
 
-const selectedDay = ref<DayOfWeek | null>(null)
+const openDay = ref<DayOfWeek | null>(null)
 
 const categoryById = computed(() => new Map(categories.value.map((category) => [category.id, category])))
 
@@ -21,10 +21,6 @@ function categoriesForDay(dayOfWeek: DayOfWeek): Category[] {
   return [...ids]
     .map((id) => categoryById.value.get(id))
     .filter((category): category is Category => category !== undefined)
-}
-
-function toggleSelected(dayOfWeek: DayOfWeek): void {
-  selectedDay.value = selectedDay.value === dayOfWeek ? null : dayOfWeek
 }
 </script>
 
@@ -42,14 +38,17 @@ function toggleSelected(dayOfWeek: DayOfWeek): void {
           :day-of-week="day"
           :date="getDateForDayOfWeek(day)"
           :categories="categoriesForDay(day)"
-          :is-selected="selectedDay === day"
-          @select="toggleSelected(day)"
+          :is-selected="openDay === day"
+          @select="openDay = day"
         />
       </div>
     </div>
 
-    <div v-if="selectedDay" class="mt-4">
-      <BlockList :day-of-week="selectedDay" />
-    </div>
+    <DayTimelineModal
+      v-if="openDay"
+      :day-of-week="openDay"
+      :date="getDateForDayOfWeek(openDay)"
+      @close="openDay = null"
+    />
   </section>
 </template>

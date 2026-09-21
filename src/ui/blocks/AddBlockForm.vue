@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Plus } from '@lucide/vue'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 import { usePlanner } from '@/composables/usePlanner'
 import type { DayOfWeek } from '@/types'
@@ -17,12 +17,16 @@ const endTime = ref('10:00')
 
 const dayOptions = Object.entries(DAY_LABELS) as [string, string][]
 
+const isValid = computed(() => {
+  if (!title.value.trim() || !categoryId.value) return false
+  return timeStringToMinutes(endTime.value) - timeStringToMinutes(startTime.value) > 0
+})
+
 async function handleSubmit(): Promise<void> {
-  if (!title.value.trim() || !categoryId.value) return
+  if (!isValid.value) return
 
   const startMinutes = timeStringToMinutes(startTime.value)
   const durationMinutes = timeStringToMinutes(endTime.value) - startMinutes
-  if (durationMinutes <= 0) return
 
   await addBlock({
     title: title.value.trim(),
@@ -50,7 +54,7 @@ async function handleSubmit(): Promise<void> {
 
     <select
       v-model="categoryId"
-      class="rounded border border-emerald-100 bg-transparent px-2 py-1.5 text-sm text-slate-700 focus:border-emerald-400 focus:outline-none dark:border-slate-600 dark:text-slate-100"
+      class="rounded border border-emerald-100 bg-white px-2 py-1.5 text-sm text-slate-700 [color-scheme:light] focus:border-emerald-400 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:[color-scheme:dark]"
     >
       <option value="" disabled>Категорія</option>
       <option v-for="category in categories" :key="category.id" :value="category.id">
@@ -60,7 +64,7 @@ async function handleSubmit(): Promise<void> {
 
     <select
       v-model="dayOfWeek"
-      class="rounded border border-emerald-100 bg-transparent px-2 py-1.5 text-sm text-slate-700 focus:border-emerald-400 focus:outline-none dark:border-slate-600 dark:text-slate-100"
+      class="rounded border border-emerald-100 bg-white px-2 py-1.5 text-sm text-slate-700 [color-scheme:light] focus:border-emerald-400 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:[color-scheme:dark]"
     >
       <option v-for="[day, label] in dayOptions" :key="day" :value="Number(day)">
         {{ label }}
@@ -72,7 +76,7 @@ async function handleSubmit(): Promise<void> {
       <input
         v-model="startTime"
         type="time"
-        class="rounded border border-emerald-100 bg-transparent px-2 py-1.5 text-sm text-slate-700 focus:border-emerald-400 focus:outline-none dark:border-slate-600 dark:text-slate-100"
+        class="rounded border border-emerald-100 bg-transparent px-2 py-1.5 text-sm text-slate-700 focus:border-emerald-400 focus:outline-none dark:border-slate-600 dark:text-slate-100 dark:[color-scheme:dark]"
       />
     </label>
 
@@ -81,13 +85,14 @@ async function handleSubmit(): Promise<void> {
       <input
         v-model="endTime"
         type="time"
-        class="rounded border border-emerald-100 bg-transparent px-2 py-1.5 text-sm text-slate-700 focus:border-emerald-400 focus:outline-none dark:border-slate-600 dark:text-slate-100"
+        class="rounded border border-emerald-100 bg-transparent px-2 py-1.5 text-sm text-slate-700 focus:border-emerald-400 focus:outline-none dark:border-slate-600 dark:text-slate-100 dark:[color-scheme:dark]"
       />
     </label>
 
     <button
       type="submit"
-      class="flex items-center justify-center gap-1 rounded bg-emerald-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-600"
+      :disabled="!isValid"
+      class="flex items-center justify-center gap-1 rounded bg-emerald-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:hover:bg-slate-300 dark:disabled:bg-slate-600 dark:disabled:hover:bg-slate-600"
     >
       <Plus :size="16" />
       Додати
