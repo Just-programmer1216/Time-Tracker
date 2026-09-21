@@ -2,6 +2,7 @@
 import { Trash2 } from '@lucide/vue'
 
 import type { Block, Category } from '@/types'
+import { formatTimeRange } from '@/utils/time'
 import { DAY_LABELS } from '@/utils/week'
 
 const props = defineProps<{
@@ -36,6 +37,7 @@ const emit = defineEmits<{
     </span>
 
     <span class="shrink-0 text-xs text-slate-400 dark:text-slate-500">
+      {{ formatTimeRange(props.block.startMinutes, props.block.durationMinutes) }} ·
       {{ DAY_LABELS[props.block.dayOfWeek] }} · {{ props.category?.name ?? '—' }}
     </span>
 

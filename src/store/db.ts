@@ -15,7 +15,11 @@ interface PlannerDb extends DBSchema {
 }
 
 const DB_NAME = 'tmt-planner'
-const DB_VERSION = 1
+const DB_VERSION = 2
+
+// Дефолтний час для блоків, створених до появи полів startMinutes/durationMinutes.
+const LEGACY_START_MINUTES = 9 * 60 // 09:00
+const LEGACY_DURATION_MINUTES = 60
 
 const DEFAULT_CATEGORY_NAMES = [
   'EPAM',
@@ -50,12 +54,33 @@ let dbPromise: Promise<IDBPDatabase<PlannerDb>> | undefined
 
 export function getDb(): Promise<IDBPDatabase<PlannerDb>> {
   dbPromise ??= openDB<PlannerDb>(DB_NAME, DB_VERSION, {
-    upgrade(db) {
-      db.createObjectStore('categories', { keyPath: 'id' })
+    async upgrade(db, oldVersion, _newVersion, transaction) {
+      if (oldVersion < 1) {
+        db.createObjectStore('categories', { keyPath: 'id' })
 
-      const blockStore = db.createObjectStore('blocks', { keyPath: 'id' })
-      blockStore.createIndex('by-week', 'weekId')
-      blockStore.createIndex('by-category', 'categoryId')
+        const blockStore = db.createObjectStore('blocks', { keyPath: 'id' })
+        blockStore.createIndex('by-week', 'weekId')
+        blockStore.createIndex('by-category', 'categoryId')
+      }
+
+      if (oldVersion < 2) {
+        // Старі блоки мали поле `order` замість реального часу — призначаємо
+        // їм дефолтний проміжок, щоб нічого не загубити.
+        const blockStore = transaction.objectStore('blocks')
+        let cursor = await blockStore.openCursor()
+        while (cursor) {
+          const legacyBlock = cursor.value as Block & { order?: number }
+          if (typeof legacyBlock.startMinutes !== 'number') {
+            const { order: _order, ...rest } = legacyBlock
+            await cursor.update({
+              ...rest,
+              startMinutes: LEGACY_START_MINUTES,
+              durationMinutes: LEGACY_DURATION_MINUTES,
+            })
+          }
+          cursor = await cursor.continue()
+        }
+      }
     },
   }).then(async (db) => {
     await seedDefaultCategories(db)

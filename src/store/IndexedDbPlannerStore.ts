@@ -25,7 +25,7 @@ export class IndexedDbPlannerStore implements PlannerStore {
   async getBlocks(weekId: string): Promise<Block[]> {
     const db = await getDb()
     const blocks = await db.getAllFromIndex('blocks', 'by-week', weekId)
-    return blocks.sort((a, b) => a.dayOfWeek - b.dayOfWeek || a.order - b.order)
+    return blocks.sort((a, b) => a.dayOfWeek - b.dayOfWeek || a.startMinutes - b.startMinutes)
   }
 
   async saveBlock(block: Block): Promise<void> {

@@ -15,7 +15,8 @@ export interface Block {
   categoryId: string
   title: string
   done: boolean
-  order: number
+  startMinutes: number // хвилини від півночі, 0–1439
+  durationMinutes: number
   createdAt: number
 }
 

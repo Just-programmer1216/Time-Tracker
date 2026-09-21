@@ -29,7 +29,13 @@ async function refresh(): Promise<void> {
   }
 }
 
-async function addBlock(input: { title: string; categoryId: string; dayOfWeek: DayOfWeek }): Promise<void> {
+async function addBlock(input: {
+  title: string
+  categoryId: string
+  dayOfWeek: DayOfWeek
+  startMinutes: number
+  durationMinutes: number
+}): Promise<void> {
   const block: Block = {
     id: crypto.randomUUID(),
     weekId: weekId.value,
@@ -37,7 +43,8 @@ async function addBlock(input: { title: string; categoryId: string; dayOfWeek: D
     categoryId: input.categoryId,
     title: input.title,
     done: false,
-    order: blocks.value.filter((existing) => existing.dayOfWeek === input.dayOfWeek).length,
+    startMinutes: input.startMinutes,
+    durationMinutes: input.durationMinutes,
     createdAt: Date.now(),
   }
   await store.saveBlock(block)
