@@ -24,3 +24,24 @@ export function getIsoDayOfWeek(date: Date = new Date()): DayOfWeek {
   const day = date.getDay()
   return (day === 0 ? 7 : day) as DayOfWeek
 }
+
+/** Дата понеділка того тижня, до якого належить `referenceDate`. */
+export function getWeekStartDate(referenceDate: Date = new Date()): Date {
+  const start = new Date(referenceDate)
+  start.setHours(0, 0, 0, 0)
+  start.setDate(start.getDate() - (getIsoDayOfWeek(referenceDate) - 1))
+  return start
+}
+
+/** Календарна дата конкретного дня тижня в межах тижня `referenceDate`. */
+export function getDateForDayOfWeek(dayOfWeek: DayOfWeek, referenceDate: Date = new Date()): Date {
+  const date = getWeekStartDate(referenceDate)
+  date.setDate(date.getDate() + (dayOfWeek - 1))
+  return date
+}
+
+const shortDateFormatter = new Intl.DateTimeFormat('uk-UA', { day: 'numeric', month: 'short' })
+
+export function formatShortDate(date: Date): string {
+  return shortDateFormatter.format(date)
+}

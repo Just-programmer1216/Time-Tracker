@@ -10,7 +10,7 @@ const { theme, toggleTheme } = useTheme()
   <header
     class="sticky top-0 z-10 border-b border-emerald-200 bg-white/95 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-800/95"
   >
-    <div class="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
+    <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
       <span class="flex items-center gap-2 text-lg font-semibold tracking-tight text-emerald-700 dark:text-emerald-400">
         <Clock :size="22" class="shrink-0" />
         TMT
