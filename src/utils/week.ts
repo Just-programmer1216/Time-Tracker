@@ -41,7 +41,22 @@ export function getDateForDayOfWeek(dayOfWeek: DayOfWeek, referenceDate: Date = 
 }
 
 const shortDateFormatter = new Intl.DateTimeFormat('uk-UA', { day: 'numeric', month: 'short' })
+const dayOnlyFormatter = new Intl.DateTimeFormat('uk-UA', { day: 'numeric' })
 
 export function formatShortDate(date: Date): string {
   return shortDateFormatter.format(date)
+}
+
+/** Діапазон тижня для мітки в перемикачі, напр. "21–27 вер." або "28 вер. – 4 жовт.". */
+export function formatWeekRange(weekStart: Date): string {
+  const weekEnd = new Date(weekStart)
+  weekEnd.setDate(weekStart.getDate() + 6)
+
+  const sameMonth = weekStart.getMonth() === weekEnd.getMonth() && weekStart.getFullYear() === weekEnd.getFullYear()
+
+  if (sameMonth) {
+    return `${dayOnlyFormatter.format(weekStart)}–${formatShortDate(weekEnd)}`
+  }
+
+  return `${formatShortDate(weekStart)} – ${formatShortDate(weekEnd)}`
 }

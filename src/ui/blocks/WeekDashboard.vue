@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
+import { useCalendarCursor } from '@/composables/useCalendarCursor'
 import { usePlanner } from '@/composables/usePlanner'
 import type { Category, DayOfWeek } from '@/types'
 import { getDateForDayOfWeek } from '@/utils/week'
@@ -9,6 +10,7 @@ import DayCard from './DayCard.vue'
 import DayTimelineModal from './DayTimelineModal.vue'
 
 const { blocks, categories } = usePlanner()
+const { cursorDate } = useCalendarCursor()
 
 const DAYS: DayOfWeek[] = [1, 2, 3, 4, 5, 6, 7]
 
@@ -36,7 +38,7 @@ function categoriesForDay(dayOfWeek: DayOfWeek): Category[] {
       >
         <DayCard
           :day-of-week="day"
-          :date="getDateForDayOfWeek(day)"
+          :date="getDateForDayOfWeek(day, cursorDate)"
           :categories="categoriesForDay(day)"
           :is-selected="openDay === day"
           @select="openDay = day"
@@ -47,7 +49,7 @@ function categoriesForDay(dayOfWeek: DayOfWeek): Category[] {
     <DayTimelineModal
       v-if="openDay"
       :day-of-week="openDay"
-      :date="getDateForDayOfWeek(openDay)"
+      :date="getDateForDayOfWeek(openDay, cursorDate)"
       @close="openDay = null"
     />
   </section>

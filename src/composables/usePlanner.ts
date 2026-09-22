@@ -1,13 +1,16 @@
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
 import { getStore } from '@/store'
 import { nextCategoryColor } from '@/store/db'
 import type { Block, Category, CategoryStat, DayOfWeek } from '@/types'
-import { getIsoWeekId } from '@/utils/week'
+
+import { useCalendarCursor } from './useCalendarCursor'
 
 const store = getStore()
 
-const weekId = ref(getIsoWeekId())
+const { cursorWeekId } = useCalendarCursor()
+
+const weekId = cursorWeekId
 const categories = ref<Category[]>([])
 const blocks = ref<Block[]>([])
 const stats = ref<CategoryStat[]>([])
@@ -28,6 +31,11 @@ async function refresh(): Promise<void> {
     isLoading.value = false
   }
 }
+
+// Перезавантажує дані щоразу, як навігація (стрілочки в перемикачі) змінює тиждень.
+watch(weekId, () => {
+  void refresh()
+})
 
 async function addBlock(input: {
   title: string
