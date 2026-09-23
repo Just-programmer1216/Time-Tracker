@@ -4,6 +4,8 @@ import { ref } from 'vue'
 
 import { usePlanner } from '@/composables/usePlanner'
 
+import CategoryColorButton from './CategoryColorButton.vue'
+
 const { categories, addCategory, removeCategory } = usePlanner()
 
 const newCategoryName = ref('')
@@ -26,7 +28,7 @@ async function handleAdd(): Promise<void> {
         :key="category.id"
         class="flex items-center gap-1.5 rounded-full border border-emerald-100 px-2.5 py-1 text-xs text-slate-600 dark:border-slate-600 dark:text-slate-200"
       >
-        <span class="size-2 rounded-full" :style="{ backgroundColor: category.color }" />
+        <CategoryColorButton :category="category" />
         {{ category.name }}
         <button
           type="button"

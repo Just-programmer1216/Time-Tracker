@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Trash2 } from '@lucide/vue'
+import { Pencil, Trash2 } from '@lucide/vue'
 import { computed, onMounted, ref } from 'vue'
 
 import { usePlanner } from '@/composables/usePlanner'
@@ -7,9 +7,13 @@ import type { Block, DayOfWeek } from '@/types'
 import { formatTimeRange, minutesToTimeString } from '@/utils/time'
 import { getIsoDayOfWeek } from '@/utils/week'
 
+import EditBlockModal from './EditBlockModal.vue'
+
 const props = defineProps<{
   dayOfWeek: DayOfWeek
 }>()
+
+const editingBlock = ref<Block | null>(null)
 
 const PIXELS_PER_HOUR = 56
 const HOURS = Array.from({ length: 24 }, (_, hour) => hour)
@@ -193,6 +197,15 @@ onMounted(() => {
 
             <button
               type="button"
+              class="shrink-0 rounded p-0.5 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 dark:text-slate-500 dark:hover:bg-emerald-950/40"
+              aria-label="Редагувати блок"
+              @click="editingBlock = block"
+            >
+              <Pencil :size="13" />
+            </button>
+
+            <button
+              type="button"
               class="shrink-0 rounded p-0.5 text-slate-400 hover:bg-red-50 hover:text-red-500 dark:text-slate-500 dark:hover:bg-red-950/40"
               aria-label="Видалити блок"
               @click="removeBlock(block.id)"
@@ -203,5 +216,7 @@ onMounted(() => {
         </div>
       </div>
     </div>
+
+    <EditBlockModal v-if="editingBlock" :block="editingBlock" @close="editingBlock = null" />
   </div>
 </template>

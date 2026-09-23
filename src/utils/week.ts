@@ -60,3 +60,45 @@ export function formatWeekRange(weekStart: Date): string {
 
   return `${formatShortDate(weekStart)} – ${formatShortDate(weekEnd)}`
 }
+
+function stripTime(date: Date): Date {
+  const stripped = new Date(date)
+  stripped.setHours(0, 0, 0, 0)
+  return stripped
+}
+
+/** Чи тиждень, до якого належить `referenceDate`, уже повністю минув (неділя в минулому). */
+export function isWeekEnded(referenceDate: Date = new Date()): boolean {
+  const weekEnd = getDateForDayOfWeek(7, referenceDate)
+  return stripTime(weekEnd) < stripTime(new Date())
+}
+
+/** Чи `referenceDate` — минулий календарний день (не сьогодні й не майбутнє). */
+export function isDayEnded(referenceDate: Date = new Date()): boolean {
+  return stripTime(referenceDate) < stripTime(new Date())
+}
+
+/** Чи весь тиждень, до якого належить `referenceDate`, ще попереду (навіть не почався). */
+export function isWeekFuture(referenceDate: Date = new Date()): boolean {
+  const weekStart = getWeekStartDate(referenceDate)
+  return stripTime(weekStart) > stripTime(new Date())
+}
+
+/** Чи `referenceDate` — майбутній календарний день. */
+export function isDayFuture(referenceDate: Date = new Date()): boolean {
+  return stripTime(referenceDate) > stripTime(new Date())
+}
+
+export type PeriodState = 'ended' | 'current' | 'future'
+
+export function getWeekPeriodState(referenceDate: Date = new Date()): PeriodState {
+  if (isWeekEnded(referenceDate)) return 'ended'
+  if (isWeekFuture(referenceDate)) return 'future'
+  return 'current'
+}
+
+export function getDayPeriodState(referenceDate: Date = new Date()): PeriodState {
+  if (isDayEnded(referenceDate)) return 'ended'
+  if (isDayFuture(referenceDate)) return 'future'
+  return 'current'
+}

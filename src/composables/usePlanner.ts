@@ -64,6 +64,11 @@ async function toggleBlock(id: string, done: boolean): Promise<void> {
   await refresh()
 }
 
+async function updateBlock(updated: Block): Promise<void> {
+  await store.saveBlock(updated)
+  await refresh()
+}
+
 async function removeBlock(id: string): Promise<void> {
   await store.deleteBlock(id)
   await refresh()
@@ -86,6 +91,13 @@ async function removeCategory(id: string): Promise<void> {
   await refresh()
 }
 
+async function updateCategoryColor(id: string, color: string): Promise<void> {
+  const existing = categories.value.find((category) => category.id === id)
+  if (!existing) return
+  await store.saveCategory({ ...existing, color })
+  await refresh()
+}
+
 export function usePlanner() {
   return {
     weekId,
@@ -95,9 +107,11 @@ export function usePlanner() {
     isLoading,
     refresh,
     addBlock,
+    updateBlock,
     toggleBlock,
     removeBlock,
     addCategory,
     removeCategory,
+    updateCategoryColor,
   }
 }

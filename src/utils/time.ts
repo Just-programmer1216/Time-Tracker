@@ -13,3 +13,11 @@ export function minutesToTimeString(totalMinutes: number): string {
 export function formatTimeRange(startMinutes: number, durationMinutes: number): string {
   return `${minutesToTimeString(startMinutes)}–${minutesToTimeString(startMinutes + durationMinutes)}`
 }
+
+export function formatDuration(durationMinutes: number): string {
+  const hours = Math.floor(durationMinutes / 60)
+  const minutes = durationMinutes % 60
+  if (hours === 0) return `${minutes} хв`
+  if (minutes === 0) return `${hours} год`
+  return `${hours} год ${minutes} хв`
+}

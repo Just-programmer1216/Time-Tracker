@@ -9,6 +9,8 @@ import WeekDashboard from '@/ui/blocks/WeekDashboard.vue'
 import CategoryManager from '@/ui/categories/CategoryManager.vue'
 import Footer from '@/ui/layout/Footer.vue'
 import NavBar from '@/ui/layout/NavBar.vue'
+import DailyStats from '@/ui/stats/DailyStats.vue'
+import WeeklyStats from '@/ui/stats/WeeklyStats.vue'
 
 const { refresh } = usePlanner()
 const { viewMode } = useCalendarCursor()
@@ -23,8 +25,14 @@ onMounted(refresh)
     <main class="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 px-4 py-6">
       <CategoryManager />
       <AddBlockForm />
-      <WeekDashboard v-if="viewMode === 'week'" />
-      <DayView v-else />
+      <template v-if="viewMode === 'week'">
+        <WeekDashboard />
+        <WeeklyStats />
+      </template>
+      <template v-else>
+        <DayView />
+        <DailyStats />
+      </template>
     </main>
 
     <Footer />

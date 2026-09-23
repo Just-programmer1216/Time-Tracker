@@ -34,7 +34,7 @@ const DEFAULT_CATEGORY_NAMES = [
 ]
 
 // Пастельна палітра, узгоджена зі світлою м'ятною темою.
-const CATEGORY_PALETTE = [
+export const CATEGORY_PALETTE = [
   '#34d399', // emerald
   '#38bdf8', // sky
   '#fbbf24', // amber
