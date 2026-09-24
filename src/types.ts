@@ -14,6 +14,7 @@ export interface Block {
   dayOfWeek: DayOfWeek
   categoryId: string
   title: string
+  description?: string // необов'язкова нотатка до блоку
   done: boolean
   startMinutes: number // хвилини від півночі, 0–1439
   durationMinutes: number

@@ -1,17 +1,26 @@
 <script setup lang="ts">
-import { Plus } from '@lucide/vue'
-import { computed, ref } from 'vue'
+import { Plus, StickyNote } from '@lucide/vue'
+import { computed, ref, watch } from 'vue'
 
+import { useCalendarCursor } from '@/composables/useCalendarCursor'
 import { usePlanner } from '@/composables/usePlanner'
 import type { DayOfWeek } from '@/types'
 import { timeStringToMinutes } from '@/utils/time'
 import { DAY_LABELS, getIsoDayOfWeek } from '@/utils/week'
 
 const { categories, addBlock } = usePlanner()
+const { viewMode, cursorDayOfWeek } = useCalendarCursor()
 
 const title = ref('')
+const description = ref('')
+const showDescription = ref(false)
 const categoryId = ref('')
-const dayOfWeek = ref<DayOfWeek>(getIsoDayOfWeek())
+const dayOfWeek = ref<DayOfWeek>(viewMode.value === 'day' ? cursorDayOfWeek.value : getIsoDayOfWeek())
+
+// У денному режимі форма слідує за відкритим днем; у тижневому вибір не чіпаємо.
+watch([viewMode, cursorDayOfWeek], ([mode, day]) => {
+  if (mode === 'day') dayOfWeek.value = day
+})
 const startTime = ref('09:00')
 const endTime = ref('10:00')
 
@@ -30,6 +39,7 @@ async function handleSubmit(): Promise<void> {
 
   await addBlock({
     title: title.value.trim(),
+    description: description.value.trim() || undefined,
     categoryId: categoryId.value,
     dayOfWeek: dayOfWeek.value,
     startMinutes,
@@ -37,6 +47,8 @@ async function handleSubmit(): Promise<void> {
   })
 
   title.value = ''
+  description.value = ''
+  showDescription.value = false
 }
 </script>
 
@@ -90,6 +102,16 @@ async function handleSubmit(): Promise<void> {
     </label>
 
     <button
+      type="button"
+      class="flex items-center justify-center gap-1 rounded border border-emerald-100 px-3 py-1.5 text-sm text-slate-500 hover:bg-emerald-50 dark:border-slate-600 dark:text-slate-400 dark:hover:bg-slate-700"
+      :class="showDescription ? 'bg-emerald-50 dark:bg-slate-700' : ''"
+      @click="showDescription = !showDescription"
+    >
+      <StickyNote :size="16" />
+      Нотатка
+    </button>
+
+    <button
       type="submit"
       :disabled="!isValid"
       class="flex items-center justify-center gap-1 rounded bg-emerald-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:hover:bg-slate-300 dark:disabled:bg-slate-600 dark:disabled:hover:bg-slate-600"
@@ -97,5 +119,13 @@ async function handleSubmit(): Promise<void> {
       <Plus :size="16" />
       Додати
     </button>
+
+    <textarea
+      v-if="showDescription"
+      v-model="description"
+      rows="3"
+      placeholder="Опис (необов'язково)"
+      class="w-full basis-full resize-y rounded border border-emerald-100 bg-transparent px-2 py-1.5 text-sm text-slate-700 placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none dark:border-slate-600 dark:text-slate-100"
+    />
   </form>
 </template>

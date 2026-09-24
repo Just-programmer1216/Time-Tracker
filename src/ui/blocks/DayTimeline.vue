@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { Pencil, Trash2 } from '@lucide/vue'
+import { Pencil, StickyNote, Trash2 } from '@lucide/vue'
 import { computed, onMounted, ref } from 'vue'
 
 import { usePlanner } from '@/composables/usePlanner'
+import { useUiScale } from '@/composables/useUiScale'
 import type { Block, DayOfWeek } from '@/types'
 import { formatTimeRange, minutesToTimeString } from '@/utils/time'
 import { getIsoDayOfWeek } from '@/utils/week'
 
+import BlockDescriptionModal from './BlockDescriptionModal.vue'
 import EditBlockModal from './EditBlockModal.vue'
 
 const props = defineProps<{
@@ -14,8 +16,12 @@ const props = defineProps<{
 }>()
 
 const editingBlock = ref<Block | null>(null)
+const describedBlock = ref<Block | null>(null)
 
-const PIXELS_PER_HOUR = 56
+const { scaleFactor } = useUiScale()
+
+// Розміри в пікселях множаться на масштаб UI, щоб таймлайн ріс разом із текстом.
+const pixelsPerHour = computed(() => 56 * scaleFactor.value)
 const HOURS = Array.from({ length: 24 }, (_, hour) => hour)
 
 const { blocks, categories, toggleBlock, removeBlock } = usePlanner()
@@ -94,7 +100,7 @@ const nonRoundTimeMarks = computed(() => {
   function addMark(minutes: number): void {
     if (minutes % 60 === 0 || seenMinutes.has(minutes)) return
     seenMinutes.add(minutes)
-    marks.push({ minutes, top: (minutes / 60) * PIXELS_PER_HOUR })
+    marks.push({ minutes, top: (minutes / 60) * pixelsPerHour.value })
   }
 
   for (const block of dayBlocks.value) {
@@ -112,17 +118,17 @@ const MIN_BLOCK_HEIGHT = 22
 const COMPACT_THRESHOLD = 38
 
 function blockHeight(block: Block): number {
-  return Math.max((block.durationMinutes / 60) * PIXELS_PER_HOUR, MIN_BLOCK_HEIGHT)
+  return Math.max((block.durationMinutes / 60) * pixelsPerHour.value, MIN_BLOCK_HEIGHT * scaleFactor.value)
 }
 
 function isCompact(block: Block): boolean {
-  return blockHeight(block) < COMPACT_THRESHOLD
+  return blockHeight(block) < COMPACT_THRESHOLD * scaleFactor.value
 }
 
 function blockStyle(block: PositionedBlock): Record<string, string> {
   const color = categoryById.value.get(block.categoryId)?.color ?? '#94a3b8'
   return {
-    top: `${(block.startMinutes / 60) * PIXELS_PER_HOUR}px`,
+    top: `${(block.startMinutes / 60) * pixelsPerHour.value}px`,
     height: `${blockHeight(block)}px`,
     left: `calc(${(block.column / block.totalColumns) * 100}% + 2px)`,
     width: `calc(${100 / block.totalColumns}% - 4px)`,
@@ -143,7 +149,7 @@ onMounted(() => {
         ? now.getHours() * 60 + now.getMinutes()
         : 8 * 60
 
-  scrollContainer.value?.scrollTo({ top: Math.max((targetMinutes / 60) * PIXELS_PER_HOUR - 80, 0) })
+  scrollContainer.value?.scrollTo({ top: Math.max((targetMinutes / 60) * pixelsPerHour.value - 80 * scaleFactor.value, 0) })
 })
 </script>
 
@@ -152,10 +158,10 @@ onMounted(() => {
     ref="scrollContainer"
     class="overflow-y-auto [scrollbar-color:#a7f3d0_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-emerald-200 [&::-webkit-scrollbar-track]:bg-transparent dark:[scrollbar-color:#475569_transparent] dark:[&::-webkit-scrollbar-thumb]:bg-slate-600"
   >
-    <div class="relative flex" :style="{ height: `${HOURS.length * PIXELS_PER_HOUR}px` }">
+    <div class="relative flex" :style="{ height: `${HOURS.length * pixelsPerHour}px` }">
       <div class="relative w-14 shrink-0 border-r border-slate-100 dark:border-slate-700">
-        <div v-for="hour in HOURS" :key="hour" class="relative" :style="{ height: `${PIXELS_PER_HOUR}px` }">
-          <span class="absolute -top-2 right-2 text-[11px] text-slate-300 dark:text-slate-600">
+        <div v-for="hour in HOURS" :key="hour" class="relative" :style="{ height: `${pixelsPerHour}px` }">
+          <span class="absolute -top-2 right-2 text-[0.6875rem] text-slate-300 dark:text-slate-600">
             {{ String(hour).padStart(2, '0') }}:00
           </span>
         </div>
@@ -163,8 +169,8 @@ onMounted(() => {
         <span
           v-for="mark in nonRoundTimeMarks"
           :key="mark.minutes"
-          class="absolute right-2 text-[11px] font-semibold text-emerald-500 dark:text-emerald-400"
-          :style="{ top: `${mark.top - 8}px` }"
+          class="absolute right-2 -translate-y-1/2 text-[0.6875rem] font-semibold text-emerald-500 dark:text-emerald-400"
+          :style="{ top: `${mark.top}px` }"
         >
           {{ minutesToTimeString(mark.minutes) }}
         </span>
@@ -175,7 +181,7 @@ onMounted(() => {
           v-for="hour in HOURS"
           :key="hour"
           class="border-t border-slate-100 dark:border-slate-700/60"
-          :style="{ height: `${PIXELS_PER_HOUR}px` }"
+          :style="{ height: `${pixelsPerHour}px` }"
         />
 
         <div
@@ -193,6 +199,16 @@ onMounted(() => {
               <p v-if="!isCompact(block)" class="truncate opacity-70">
                 {{ formatTimeRange(block.startMinutes, block.durationMinutes) }}
               </p>
+            </button>
+
+            <button
+              v-if="block.description && !isCompact(block)"
+              type="button"
+              class="shrink-0 rounded p-0.5 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 dark:text-slate-500 dark:hover:bg-emerald-950/40"
+              aria-label="Показати опис"
+              @click="describedBlock = block"
+            >
+              <StickyNote :size="13" />
             </button>
 
             <button
@@ -218,5 +234,6 @@ onMounted(() => {
     </div>
 
     <EditBlockModal v-if="editingBlock" :block="editingBlock" @close="editingBlock = null" />
+    <BlockDescriptionModal v-if="describedBlock" :block="describedBlock" @close="describedBlock = null" />
   </div>
 </template>

@@ -18,6 +18,7 @@ const emit = defineEmits<{
 const { categories, updateBlock } = usePlanner()
 
 const title = ref(props.block.title)
+const description = ref(props.block.description ?? '')
 const categoryId = ref(props.block.categoryId)
 const dayOfWeek = ref<DayOfWeek>(props.block.dayOfWeek)
 const startTime = ref(minutesToTimeString(props.block.startMinutes))
@@ -39,6 +40,7 @@ async function handleSubmit(): Promise<void> {
   await updateBlock({
     ...props.block,
     title: title.value.trim(),
+    description: description.value.trim() || undefined,
     categoryId: categoryId.value,
     dayOfWeek: dayOfWeek.value,
     startMinutes,
@@ -88,6 +90,13 @@ onUnmounted(() => {
             type="text"
             placeholder="Назва блоку"
             class="rounded border border-emerald-100 bg-white px-2 py-1.5 text-sm text-slate-700 placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+          />
+
+          <textarea
+            v-model="description"
+            rows="3"
+            placeholder="Опис (необов'язково)"
+            class="resize-y rounded border border-emerald-100 bg-white px-2 py-1.5 text-sm text-slate-700 placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
           />
 
           <select

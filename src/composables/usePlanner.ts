@@ -39,6 +39,7 @@ watch(weekId, () => {
 
 async function addBlock(input: {
   title: string
+  description?: string
   categoryId: string
   dayOfWeek: DayOfWeek
   startMinutes: number
@@ -50,6 +51,7 @@ async function addBlock(input: {
     dayOfWeek: input.dayOfWeek,
     categoryId: input.categoryId,
     title: input.title,
+    description: input.description,
     done: false,
     startMinutes: input.startMinutes,
     durationMinutes: input.durationMinutes,
