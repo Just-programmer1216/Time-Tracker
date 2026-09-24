@@ -37,7 +37,7 @@ const emit = defineEmits<{
       <span
         v-for="category in props.categories"
         :key="category.id"
-        class="flex items-center gap-1 rounded-full bg-slate-50 px-1.5 py-0.5 text-[11px] text-slate-500 dark:bg-slate-900 dark:text-slate-400"
+        class="flex items-center gap-1 rounded-full bg-slate-50 px-1.5 py-0.5 text-[0.6875rem] text-slate-500 dark:bg-slate-900 dark:text-slate-400"
       >
         <span class="size-1.5 shrink-0 rounded-full" :style="{ backgroundColor: category.color }" />
         {{ category.name }}
