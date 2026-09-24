@@ -28,7 +28,8 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,ico,png}'],
+        globPatterns: ['**/*.{js,css,html,svg,ico,png,woff2}'],
+        importScripts: ['notification-click.js'],
       },
     }),
   ],
